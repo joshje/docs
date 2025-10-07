@@ -1,0 +1,96 @@
+---
+title: "Authentication"
+description: "The Enode API uses [OAuth 2.0](https://oauth.net/2/) client access tokens for authenticating server requests."
+---
+
+## API credentials
+
+Enode API access begins with a client and its corresponding *client ID* and *client secret*. Clients organize data, are separate, and relate to a specific [environmentAPI](https://developers.enode.com/api/reference#environments).
+
+API credentials are used to [obtain an access tokenAPI](https://developers.enode.com/api/reference#getting-an-access-token) for accessing [client-wide endpointsAPI](https://developers.enode.com/api/reference#accessing-the-api-with-the-access-token) and [user-specific endpointsAPI](https://developers.enode.com/api/reference#accessing-user-specific-endpoints).
+
+| Key | Description |
+| :--- | :--- |
+| **Client ID** | The identifier for your client, referred to as the `client_id`. |
+| **Client secret** | The secret for your client, referred to as the `client_secret`. |
+
+<Danger>
+**Keep your API credentials secret**
+
+Transmit and store your API credentials securely. Avoid including them in source code. If you suspect a leak, generate a new secret in [your dashboard](https://developers.enode.com/dashboard) or contact customer support.
+
+Generating a new secret immediately invalidates the previous one, blocking access for all API requests using it. Note that this action is irreversible.
+</Danger>
+
+
+<Info>
+**Getting access to API credentials**
+
+To start, [create an account](https://developers.enode.com/register) and create a client to get your API credentials. Clients created through the dashboard are limited to the [sandboxAPI](https://developers.enode.com/api/reference#sandbox) environment. For [productionAPI](https://developers.enode.com/api/reference#production) environment access, [contact sales](https://enode.com/contact).
+</Info>
+
+## Getting an access token
+
+The *access token* authorizes client access to all data and functionality. Obtain it via the [OAuth 2.0 client credentials grant](https://www.oauth.com/oauth2-servers/access-tokens/client-credentials/) using the [API credentialsAPI](https://developers.enode.com/api/reference#api-credentials) and the relevant [OAuth URLsAPI](https://developers.enode.com/api/reference#environments) for your client's environment.
+
+
+```bash Token request example
+curl https://oauth.{YOUR_CLIENT_ENVIRONMENT}.enode.io/oauth2/token \
+-X POST \
+-u {YOUR_CLIENT_ID}:{YOUR_CLIENT_SECRET} \
+-d "grant_type=client_credentials"
+```
+
+After requesting the token URL, you'll receive an access token in the response. Cache this token on your server until it expires and [needs refreshingAPI](https://developers.enode.com/api/reference#refreshing-access-tokens). Keep the access token secret.
+
+```json Token response example
+
+{
+	"access_token": "{YOUR_ACCESS_TOKEN}",
+	"expires_in": 3599,
+	"scope": "",
+	"token_type": "bearer"
+}
+```
+
+<Warning>
+**Use an existing OAuth client for authentication**
+
+Our API follows the [OAuth 2.0 specification](https://www.rfc-editor.org/rfc/rfc6749) without modification, allowing you to use various OAuth clients for authentication. We recommend this over creating your own implementation. See [this reference](https://oauth.net/code/) for available clients in your language.
+</Warning>
+
+## Refreshing access tokens
+
+Access tokens expire hourly, indicated by the `expires_in` key in the response. When expired, [obtain a new tokenAPI](https://developers.enode.com/api/reference#getting-an-access-token).
+
+### Accessing the API with the access token
+
+Authenticate all API requests using a [bearer authentication header](https://www.rfc-editor.org/rfc/rfc6750#section-2.1). This header accesses client-wide endpoints ([service healthAPI](https://developers.enode.com/api/reference#health), [tariffsAPI](https://developers.enode.com/api/reference#tariffs), [user managementAPI](https://developers.enode.com/api/reference#users), and [webhooksAPI](https://developers.enode.com/api/reference#webhooks)).
+
+| Type | Value |
+| :--- | :--- |
+| **Header** | `Authorization: Bearer {YOUR_ACCESS_TOKEN}` |
+
+
+```bash Client resource request example
+curl https://enode-api.{YOUR_CLIENT_ENVIRONMENT}.enode.io/health/ready \
+-H "Authorization: Bearer {YOUR_ACCESS_TOKEN}" \
+-H "Content-Type: application/json" \
+```
+
+## Accessing user-specific endpoints
+
+For resources specific to a user, include an additional header with the *user ID* along with the general authorization header. For versions newer than 2023-08-01, this is no longer required.
+
+Use this additional header for general user endpoints ([locationsAPI](https://developers.enode.com/api/reference#locations), [usersAPI](https://developers.enode.com/api/reference#user-management), [schedulesAPI](https://developers.enode.com/api/reference#schedules), [statisticsAPI](https://developers.enode.com/api/reference#statistics)) and device-specific endpoints ([chargersAPI](https://developers.enode.com/api/reference#chargers), [HVACsAPI](https://developers.enode.com/api/reference#hvacs), [solar invertersAPI](https://developers.enode.com/api/reference#inverters), and [vehiclesAPI](https://developers.enode.com/api/reference#vehicles)).
+
+| Type | Value |
+| :--- | :--- |
+| **Header** | `Enode-User-Id: {USER_ID}` |
+
+```bash User resource request example
+curl https://enode-api.{YOUR_CLIENT_ENVIRONMENT}.enode.io/me \
+-X GET \
+-H "Authorization: Bearer {YOUR_ACCESS_TOKEN}" \
+-H "Enode-User-Id: {USER_ID}" \
+```

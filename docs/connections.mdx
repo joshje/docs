@@ -1,0 +1,111 @@
+---
+title: Connections
+icon: "plug"
+description: "This overview collects key resources for our connections."
+---
+
+## Device categories
+
+We offer connections to devices through our [API](https://developers.enode.com/api/) in the following categories — vehicles, chargers, HVACs, solar inverters, batteries and meters. Find relevant information and documentation for each category below.
+
+| Category | API endpoints | API documentation | Supported brands and models |
+| --- | --- | --- | --- |
+| *Vehicles* | `/vehicles/*` | [  View  ](https://developers.enode.com/api/reference#vehicles) | [  View  ](https://developers.enode.com/api/capabilities/vehicle) |
+| *Chargers* | `/chargers/*` | [  View  ](https://developers.enode.com/api/reference#chargers) | [  View  ](https://developers.enode.com/api/capabilities/charger) |
+| *HVACs* | `/hvacs/*` | [  View  ](https://developers.enode.com/api/reference#hvac) | [  View  ](https://developers.enode.com/api/capabilities/hvac) |
+| *Solar inverters* | `/inverters/*` | [  View  ](https://developers.enode.com/api/reference#solar-inverters) | [  View  ](https://developers.enode.com/api/capabilities/inverter) |
+| *Batteries* | `/batteries/*` | [  View  ](https://developers.enode.com/api/reference#batteries) | [  View  ](https://developers.enode.com/api/capabilities/battery) |
+| *Meters* | `/meters/*` | [  View  ](https://developers.enode.com/api/reference#meters) | [  View  ](https://developers.enode.com/api/capabilities/meter) |
+
+## Brands and models
+
+In our API, a hardware brand (e.g., *Tesla*) is referred to as a `vendor` or `brand`. Brands usually have multiple models (e.g., *Model S P85*). For a list of supported brands and models, see our [connection capabilities overview](https://developers.enode.com/api/capabilities).
+
+<Warning>
+**Manual activation of certain brands and models**
+
+Most brands and models are activated by default. However, some require activation upon request (indicated in the *Activation Required* column). This is either due to our implementation work being in progress (reflected as an *Integration status* of *Beta*) or frequent issues with vendor APIs (reflected via the *Reliability* score).
+</Warning>
+
+## Connection capabilities
+
+The [connection capabilities overview](https://developers.enode.com/api/capabilities) displays key device information, implementation status, and supported capabilities for each brand and model.
+
+Capabilities represent our API's ability to retrieve information, perform actions, or use [Optimize features](https://enode.io/optimize) (e.g., [smart charging](https://developers.enode.com/docs/smart-charging/introduction) or [scheduling](https://developers.enode.com/docs/scheduling)) for a specific model.
+
+<Info>
+**Browsing connections capabilities**
+
+When browsing the connection capabilities overview, access descriptions for each piece of information by clicking the `Help` button or individual buttons per model.
+</Info>
+
+### Interventions
+
+For certain brands and models, some or all capabilities must be unlocked via an [intervention](https://developers.enode.com/docs/interventions) performed by the user.
+
+Examples could be signing up for first-party user accounts, signing up for a subscription, changing settings in the first-party app, or changing settings on the device itself.
+
+<Warning>
+**Where to find interventions**
+
+Please refer to our [interventions guide](https://developers.enode.com/docs/interventions#accessing-interventions-via-our-api) on how to use our interventions API, or find specific interventions by vendor in the [connection capabilities overview](https://developers.enode.com/api/capabilities).
+</Warning>
+
+### Accessing a connected device's capabilities
+
+A connected device always includes a `capabilities` object, providing a real-time description of the device's capabilities. Use this information to adapt your user experience, ensuring, for example, that unsupported actions are disabled or unavailable information is hidden.
+
+```json
+{
+  "id": "8d90101b-3f2f-462a-bbb4-1ed320d33bbe",
+  "vendor": "TESLA",
+  "capabilities": {
+    "chargeState": {
+      "isCapable": false,
+      "interventionIds": [
+        "c8a9fe78-44fd-482a-bebc-ef6047e6c0fe",
+      ]
+    },
+    "information": {
+      "isCapable": true,
+      "interventionIds": []
+    },
+    { ... }
+  },
+  { ... }
+}
+```
+
+## Connection statuses
+
+The connection status for different vendors (brands) is available on our external [status page](https://status.enode.io/).
+
+## Connecting to devices
+
+Connect to a user's device by [linking a vendor to a userAPI](https://developers.enode.com/api/reference#postUsersUseridLink) using [Link UI](https://developers.enode.com/docs/link-ui/introduction), a simple web interface for accessing users' hardware.
+
+A user can link to multiple vendors across various categories. Once your [userAPI](https://developers.enode.com/api/reference#getUser) links to one or more vendors, you can access all devices available through the linked vendor's APIs.
+
+<Warning>
+**Getting started**
+
+For a quick overview of the linking process, see our [getting started guides](https://developers.enode.com/docs/getting-started).
+</Warning>
+
+## Interacting with connected devices
+
+Interact with connected devices via the respective API endpoints, e.g., `/vehicles/*`. Each device receives a unique `id` upon linking, which you can use to fetch information or perform actions.
+
+### Response times
+
+When interacting with connected devices through our API, various delays and timing characteristics arise. Factors include vendor API response times, model-specific characteristics, and temporary vendor issues.
+
+You don't need to know the specifics of these delays for each brand and model, but you can refer to the *Reliability* score in our [connection capabilities overview](https://developers.enode.com/api/capabilities). A lower *Reliability* score typically indicates longer delays.
+
+<Warning>
+**More on response times**
+
+For information about response times and examples of delays on specific endpoints, consult the [response timesAPI](https://developers.enode.com/api/reference#response-times) section in our API reference.
+</Warning>
+
+If you experience unusually long response times with a specific device, brand, or model during development or production, check our [status page](https://status.enode.io/), review the *Reliability* score for the specific model in our [connection capabilities overview](https://developers.enode.com/api/capabilities), or [contact us](https://developers.enode.com/support/report-an-issue) for assistance.

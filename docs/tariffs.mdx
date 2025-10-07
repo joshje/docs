@@ -1,0 +1,107 @@
+---
+title: Tariffs
+icon: "coins"
+description: "A tariff represents an electricity pricing structure that dictate the cost of electricity based on time and a location. Tariffs enables the use custom pricing strategies that can vary from simple fixed-rates to more complex dynamic pricing."
+---
+
+## Constructing a Tariff
+
+Tariffs are created and updated using the `PUT /tariffs/{tariffId}` [endpointAPI](https://developers.enode.com/api/reference#sendTariffInformation), which accepts a list of tariff prices defined as name/cost pairs.
+
+A tariff is defined by multiple unique combinations of `tariffId` and `tariffName`. The `tariffId` functions similarly to a directory identifier, while `tariffName` resembles a file within that directory. Although there are no strict rules on how these identifiers should be structured, it is practical to use a consistent `tariffId` for all related tariff prices distinguished by `tariffName`.
+
+A simple example of a fixed-rate tariff could be something like:
+
+```json
+[
+  {
+    "name": "PEAK",
+    "cost": "10.25"
+  },
+  {
+    "name": "OFF-PEAK",
+    "cost": "8.89"
+  }
+]
+```
+
+To apply a tariff to a specific location and tariff prices to specific time intervals, use the `PUT /locations/{locationId}/tariff` [endpointAPI](https://developers.enode.com/api/reference#associateUserLocationWithTariff). The tariff intervals will be interpreted in the local time zone of the linked location.
+
+A tariff interval consists of a day of the week (0-6), and a start (`from`) and end (`to`) time in HH:MM format. `from` is inclusive, while `to` is exclusive. To specify an interval ending at midnight but including the last minute of the day, set the `to` value to 24:00.
+
+Linking the example fixed-rate tariff from above to a location could be done through these tariff intervals:
+
+```json expandable
+{
+  "tariffId": "example-tariff",
+  "tariffIntervals": [
+    {
+      "name": "OFF-PEAK",
+      "from": "00:00",
+      "to": "12:00",
+      "weekdays": [0, 1, 2, 3, 4]
+    },
+    {
+      "name": "PEAK",
+      "from": "12:00",
+      "to": "24:00",
+      "weekdays": [0, 1, 2, 3, 4]
+    },
+    {
+      "name": "OFF-PEAK",
+      "weekdays": [5, 6],
+      "from": "00:00",
+      "to": "06:00"
+    },
+    {
+      "name": "PEAK",
+      "weekdays": [5, 6],
+      "from": "06:00",
+      "to": "24:00"
+    }
+  ]
+}
+```
+
+### Interval Constraint
+
+- Intervals cannot span midnight; hence `to` must always be greater than `from`.
+- Intervals within the same weekday cannot overlap.
+
+## Price Models
+
+To ensure that pricing strategies can be tailored to meet specific operational and market demands, our API supports two main pricing strategies - Stable and Dynamic prices.
+
+### Stable Prices
+
+Stable prices are ideal for scenarios with consistent pricing patterns or infrequently changing pricing structures, such as time-of-use tariffs or peak/off-peak pricing. For tariffs like these, describe what *type* of price it is when [creating the tariff pricesAPI](https://developers.enode.com/api/reference#sendTariffInformation), e.g., `WEEKEND`, through the `name` property and link the tariff intervals once.
+
+If prices change, send new prices for the relevant tariffs, but don’t change anything related to tariff intervals.
+
+### Dynamic Prices
+
+For frequently changing prices, such as those in volatile markets, use the dynamic prices model. Prices should be added as a time series, with each time series of prices given its own `tariffId`. Use `tariffName` to represent the start time for when a price is enforced. For example, price area `NO1` under NordPool would get its own `tariffId` separating it from other price areas while `tariffName` would communicate the timestamp from when the price applies.
+
+Update or add tariff prices when they become available, e.g., at a frequency of one hour for the NordPool example. If these new or updated prices have caused a change in the tariff intervals, loop over locations and assign the correct tariff price to the correct tariff interval.
+
+If the prices in the time series could be preliminary or have other statuses, prefixing them with this status will distinguish where prices came from and help with potential debugging of, for example, smart charging plans.
+
+When re-linking new or updated tariff intervals to a location, regardless of what pricing strategy is used, always supply as full a list of intervals as possible. This is because the old intervals will not be merged with the new ones. Instead, the new tariff intervals will overwrite the existing intervals.
+
+## Tariffs and Smart Charging
+
+Tariff price signals are an important part of making a smart charging plan. If no tariff prices are available, smart charging will fall back to market area prices, and if those aren't available the vehicle will stop and await prices.
+
+If there are gaps in the tariff intervals, market prices will be applied to the gaps. Such a mix of price signals can cause unexpected behavior as tariffs might use different currencies or methodologies, e.g., include markup, VAT, and other fees not taken into account by market prices.
+
+Changes to tariff prices or intervals will update the smart charging plan. This means that if forecasted prices are replaced with official ones, the plan's prices and charging intervals will be updated to reflect the change. Similarly, if a plan was based on a mix of tariff and market area prices, due to gaps in the tariff intervals, it will be recalculated.
+
+## Best Practice
+
+- Re-use tariffs where possible. Locations can be linked to only one `tariffId`, but a `tariffId` can be linked to multiple locations.
+- Ensure tariff intervals are complete with no gaps. If there are gaps in the intervals and they are used for optimizing charging, market prices will be ingested into the gaps which will lead to unexpected results.
+- If a dynamic prices model is employed, update tariff prices when they change to reflect the most accurate and current pricing.
+- When re-linking new or updated tariff intervals to a location, always supply a full list of intervals as new tariff intervals will overwrite the existing intervals. N.B. don't forget to include the current hour.
+- Use a consistent strategy for assigning `tariffId` and `tariffName` to simplify management and implementation.
+
+By adhering to these guidelines, you can optimize the implementation of tariffs in your smart charging solutions, enhancing efficiency and reliability.

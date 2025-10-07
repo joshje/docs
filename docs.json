@@ -1,0 +1,170 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "mint",
+  "name": "Enode Docs",
+  "colors": {
+    "primary": "#83ab13",
+    "light": "#87be22",
+    "dark": "#5d770f"
+  },
+  "favicon": "/favicon.svg",
+  "fonts": {
+    "heading": {
+      "family": "Whyte",
+      "format": "woff2",
+      "source": "https://enode.com/assets/ABCWhyteInktrap-Medium-ChZt1jK2.woff2"
+    },
+    "body": {
+      "family": "Whyte",
+      "format": "woff2",
+      "source": "https://enode.com/assets/ABCWhyteVariable-CzNSyvBS.woff2"
+    }
+  },
+  "appearance": {
+    "default": "light"
+  },
+  "background": {
+    "decoration": "grid"
+  },
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Home",
+        "icon": "house",
+        "pages": [
+          "index"
+        ]
+      },
+      {
+        "tab": "Docs",
+        "icon": "book-open",
+        "pages": [
+          {
+            "group": " ",
+            "pages": [
+              "/docs/getting-started",
+              {
+                "group": "Integration Guide",
+                "icon": "signs-post",
+                "pages": [
+                  "/docs/integration-guide/introduction",
+                  "/docs/integration-guide/planning-your-integration",
+                  "/docs/integration-guide/setting-up",
+                  "/docs/integration-guide/accessing-the-api"
+                ]
+              }
+            ]
+          },
+          {
+            "group": "Connect",
+            "pages": [
+              "/docs/connections",
+              {
+                "group": "Link UI",
+                "icon": "mobile",
+                "pages": [
+                  "/docs/link-ui/relinking"
+                ]
+              }
+            ]
+          },
+          {
+            "group": "Optimize",
+            "pages": [
+              {
+                "group": "Smart Charging",
+                "icon": "bolt",
+                "pages": [
+                  "/docs/smart-charging/introduction"
+                ]
+              },
+              "docs/tariffs"
+            ]
+          }
+        ]
+      },
+      {
+        "tab":"API",
+        "icon": "code-simple",
+        "groups": [
+          {
+            "group": "API Documentation",
+            "pages": [
+              "/api/reference",
+              "api/environments",
+              "/api/authentication",
+              "/api/response-times"
+            ]
+          },
+          {
+            "group": "Endpoints",
+            "openapi": "openapi.json"
+          }
+        ]
+      },
+      {
+        "tab":"Changelog",
+        "icon": "clock-rotate-left",
+        "pages": [
+          "/api/changelog"
+        ]
+      }
+    ],
+    "global": {
+      "anchors": [
+        {
+          "anchor": "Status",
+          "href": "https://status.enode.io/",
+          "icon": "signal-stream"
+        },
+        {
+          "anchor": "Contact Us",
+          "href": "https://enode.com/contact",
+          "icon": "envelope"
+        },
+        {
+          "anchor": "Blog",
+          "href": "https://enode.com/blog",
+          "icon": "newspaper"
+        }
+      ]
+    }
+  },
+  "logo": {
+    "light": "/logo/light.svg",
+    "dark": "/logo/dark.svg",
+    "href": "https://enode.com"
+  },
+  "navbar": {
+    "links": [
+      {
+        "label": "Contact Sales",
+        "href": "https://enode.com/contact"
+      }
+    ],
+    "primary": {
+      "type": "button",
+      "label": "Create account",
+      "href": "https://developers.enode.com/register"
+    }
+  },
+  "contextual": {
+    "options": [
+      "copy",
+      "view",
+      "chatgpt",
+      "claude",
+      "perplexity",
+      "mcp",
+      "cursor",
+      "vscode"
+    ]
+  },
+  "footer": {
+    "socials": {
+      "x": "https://x.com/mintlify",
+      "github": "https://github.com/mintlify",
+      "linkedin": "https://linkedin.com/company/mintlify"
+    }
+  }
+}

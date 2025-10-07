@@ -1,0 +1,177 @@
+---
+title: Getting started
+icon: "arrow-pointer"
+description: "The [Enode API](https://developers.enode.com/api/) lets you connect to a wide range of green energy hardware. This guide demonstrates linking devices to a user and making your first API call by fetching the user."
+---
+
+## Prerequisites
+
+<Warning>
+**API keys**
+
+Before you get started, you need your `client_id` and `client_secret` credentials. [Create an account](https://developers.enode.com/register) and make a client if you haven't already done this.
+</Warning>
+
+## Fetching mocked or real devices
+
+You have one set of credentials for the `sandbox` environment and one for the `production` environment. Before making any requests, decide whether to fetch mocked or real devices.
+
+- For *mocked or virtual devices*, use the `sandbox` environment
+- For *real devices*, use the `production` environment
+
+The rest of this guide refers to the `sandbox` environment. For real devices, replace `sandbox` with `production` in URLs. Ensure your `client_id` and `client_secret` correspond to the chosen environment.
+
+<Info>
+**Device types**
+
+This guide uses [vehiclesAPI](https://developers.enode.com/api/reference#vehicles) as an example. Follow the same process to link [chargersAPI](https://developers.enode.com/api/reference#chargers), [HVACsAPI](https://developers.enode.com/api/reference#hvac), or [solar invertersAPI](https://developers.enode.com/api/reference#solar-inverters).
+</Info>
+
+### Create a virtual asset in sandbox
+
+In sandbox, you must first create a virtual asset that represents a device you can link.
+
+<Steps>
+<Step>
+Open your client in the [dashboard](https://developers.enode.com/dashboard) and select *Assets*.
+</Step>
+<Step>
+Click *Create new*, and enter the details for the new asset by filling out the form.
+</Step>
+<Step>
+When created successfully, open the *Virtual* tab of your device list.
+</Step>
+<Step>
+Select the virtual asset you just created, and note the *Username* and *Password*. Use these values in the next step.
+</Step>
+</Steps>
+
+<Info>
+**Sandbox guide**
+
+For more detailed information about how to use our Sandbox UI to read and control Sandbox assets, please refer to our [dedicated Sandbox guide](https://developers.enode.com/docs/sandbox).
+</Info>
+
+## Step 1: Get an API access token
+
+First, call the Enode OAuth API using `client_id` and `client_secret`.
+
+This guide uses cURL for examples, but you can use Postman. To get your access token in Postman, apply [these settings](https://developers.enode.com/images/postman_accesstoken.png). We also maintain an updated [Postman collection](https://enode-api.production.enode.io/postman/latest.json).
+
+In the examples below, replace the entire string inside the brackets, including the brackets.
+
+```bash
+curl https://oauth.sandbox.enode.io/oauth2/token \
+-X POST \
+-u {YOUR_CLIENT_ID}:{YOUR_CLIENT_SECRET} \
+-d "grant_type=client_credentials"
+```
+
+If you provided the correct values, you should receive a successful response containing an `access_token`.
+
+```json
+{
+  "access_token": "{YOUR_ACCESS_TOKEN}",
+  "expires_in": 3599,
+  "scope": "",
+  "token_type": "bearer"
+}
+```
+
+## Step 2: Create a Link session
+
+Next, use the `access_token` to create a [Link sessionAPI](https://developers.enode.com/api/reference#postUsersUseridLink). This grants the user temporary access to Enode Link UI, a web interface for connecting hardware to your app.
+
+```bash
+curl https://enode-api.sandbox.enode.io/users/10ae68cd/link \
+-X POST \
+-H "Authorization: Bearer {YOUR_ACCESS_TOKEN}" \
+-H "Content-Type: application/json" \
+-d '{
+  "vendorType": "vehicle",
+  "scopes": [
+    "vehicle:read:data",
+    "vehicle:read:location",
+    "vehicle:control:charging"
+  ],
+  "language": "en-US",
+  "redirectUri": "https://localhost:3000"
+}'
+```
+
+The `userId` in the call, such as `10ae68cd`, should be a unique string that identifies your user, preferably your user's primary key in your system. The API will automatically create a user if it doesn't recognize the `userId`. Refer to our [API referenceAPI](https://developers.enode.com/api/reference#postUsersUseridLink) for more details.
+
+A valid `access_token` results in a successful response with a `linkUrl`.
+
+```json Link response
+{
+  "linkToken": "WFiMjNjZDRANThlZmIyMzMtYTNjNS00Njk...", // Used by the Link SDK
+  "linkUrl": "{YOUR_LINK_URL}" // Redirect or display in in-app browser
+}
+```
+
+Please note that this API call requires an API version of `2024-01-01` or higher. If you are following this guide using a client created before January 1st 2024, please set a version header or change your default client version. For more information, you can refer to our [versioning guideAPI](https://developers.enode.com/api/reference#versioning).
+
+<Info>
+**Double check the following if you run into errors here**
+
+- Ensure the full `access_token` string is copied (without the " quotes)
+- Verify the URL's environment reference (`sandbox` or `production`) corresponds to the `access_token` environment from [step 1](https://developers.enode.com/docs/getting-started#step-1-get-an-api-access-token)
+- Ensure that the `scopes` you are passing are matching the `vendorType`, e.g. pass `["inverter:read:data", "inverter:read:location"]` when linking an `inverter` ([learn more about scopesAPI](https://developers.enode.com/api/reference#scopes))
+</Info>
+
+## Step 3: Link a device through Link UI
+
+Open the `linkUrl` from the previous step in your browser.
+
+Be sure to choose the vehicle brand of [the asset you created earlier](https://developers.enode.com/docs/getting-started#create-a-virtual-asset-in-sandbox) and use the username and password provided to you. You may use any two-factor authentication code.
+
+Proceed to the flow until you see the [success screen](https://developers.enode.com/docs/link-ui/introduction#step-6-success), and tap `Complete`. You can learn more about the device linking journey in our [Link UI guide](https://developers.enode.com/docs/link-ui/introduction).
+
+Tapping `Complete` on this screen redirects to your specified redirect URL (the `redirectUri` parameter in the Link call from the [previous step](https://developers.enode.com/docs/getting-started#step-2-create-a-link-session)). Refer to our [API referenceAPI](https://developers.enode.com/api/reference#postUsersUseridLink) for more details.
+
+## Step 4: Fetch the user
+
+After linking vehicles to your user, fetch the user using the `/users/{userId}` endpoint.
+
+```bash
+curl https://enode-api.sandbox.enode.io/users/10ae68cd \
+-X GET \
+-H "Authorization: Bearer {YOUR_ACCESS_TOKEN}"
+```
+
+With correct values, you'll receive a response containing the user object. The `linkedVendors` array should include the vendor linked in [step 3](https://developers.enode.com/docs/getting-started#step-3-link-a-vehicle-through-link-ui).
+
+```json
+{
+  "id": "10ae68cd",
+  "linkedVendors": [
+    {
+      "vendor": "{YOUR_LINKED_VENDOR}", // For example: "TESLA", "VOLKSWAGEN"
+      "isValid": true
+    },
+    // If you linked additional vendors, they will show up here
+  ]
+}
+```
+
+<Info>
+**Double check the following if you run into errors here**
+
+- You copied the entire `access_token` string (excluding the `"` quotes)
+- That the environment reference (`sandbox` or `production`) in the URL matches the environment you created an `access_token` for in [step 1](https://developers.enode.com/docs/getting-started#step-1-get-an-api-access-token)
+</Info>
+
+## All done!
+
+Congratulations on making your first call to the Enode API! To learn more about using our API, you have a couple of options:
+
+<Columns cols={2}>
+<Card title="Read our integration guide" horizontal icon="book" href="https://developers.enode.com/docs/integration-guide/introduction">
+	The integration journey with Enode
+</Card>
+
+<Card title="API reference" horizontal icon="globe" href="/api/reference#introduction">
+  The ins and outs of our endpoints
+</Card>
+</Columns>

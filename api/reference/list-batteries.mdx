@@ -1,0 +1,325 @@
+---
+title: Batteries
+api: "GET /batteries"
+contentType: "application/json"
+description: "The Battery object represents a residential energy storage unit, like a Tesla Powerwall or Enphase IQ. It offers detailed insights into the battery's operation and allows you to instruct the battery on handling its stored energy."
+---
+
+## List batteries
+
+```http
+GET /batteries
+```
+
+Returns a paginated list of all Batteries.
+
+## Request
+
+**Query parameters**
+
+<ParamField path="after" type="string">
+  Optional
+</ParamField>
+<ParamField path="before" type="string">
+  Optional
+</ParamField>
+<ParamField path="pageSize" type="integer">
+  Optional.
+
+  Default value: `50`
+</ParamField>
+
+## Response
+
+**Attributes**
+
+<ResponseField name="data" type="array of object">
+  Paginated list of batteries
+
+  <Accordion title="Child attributes">
+    <ResponseField name="id" type="string<uuid>">
+      Unique identifier for the battery object
+    </ResponseField>
+
+    <ResponseField name="userId" type="string">
+      The ID of the user that linked this battery
+    </ResponseField>
+
+    <ResponseField name="vendor" type="string">
+      Machine-friendly name of the vendor. Use this in API requests.
+      
+      **Possible values:** `TESLA`, `ENPHASE`, `GIVENERGY`, `HUAWEI`, `SOLAREDGE`, `SMA`, `FOXESS`, `SOLAX`, `SOLIS`
+    </ResponseField>
+
+    <ResponseField name="lastSeen" type="string<date-time>">
+      The last time Enode successfully communicated with the vendor or when the battery was initially linked
+    </ResponseField>
+
+    <ResponseField name="isReachable" type="boolean">
+      Indicates whether Enode can currently access live data from the battery. If the battery is not reachable, data updates will be delayed
+    </ResponseField>
+
+     <ResponseField name="information" type="object">
+         Descriptive information about the battery
+     
+         <Accordion title="Child attributes">
+           <ResponseField name="id" type="string">
+             Battery vendor ID
+           </ResponseField>
+
+           <ResponseField name="brand" type="string">
+             A formatted and properly cased OEM brand name, suitable for reading by humans. May contain special characters
+           </ResponseField>
+
+           <ResponseField name="model" type="string">
+             Battery model
+           </ResponseField>
+
+           <ResponseField name="siteName" type="string">
+             Name of the site, as set by the user on the device/vendor. If no user-specified name is available, we construct a fallback name using the vendor/device/model names
+           </ResponseField>
+
+           <ResponseField name="installationDate" type="string<date-time>">
+             Battery installation date
+           </ResponseField>
+         </Accordion>
+     </ResponseField>
+
+    <ResponseField name="config" type="object">
+      Configuration settings for the battery
+      
+      <Accordion title="Child attributes">
+        <ResponseField name="operationMode" type="string or null">
+          The current operation mode of the battery.
+          
+          **Possible values:**
+          
+          - **SELF_RELIANCE**: Minimizes household reliance on the grid. Uses energy from solar or battery for household consumption before importing from the grid. Energy may be exported to the grid from solar, depending on excess solar and user settings in the OEM app.
+          
+          - **TIME_OF_USE**: Maximizes energy cost savings in accordance with a user-defined schedule matching a utility rate plan. Energy may be consumed from solar, battery, or grid sources, depending on current prices and user settings in the OEM app. Energy may be exported to the grid from solar or battery sources, depending on current prices and user settings in the OEM app.
+          
+          - **IMPORT_FOCUS**: Prioritizes charging the battery. Uses excess solar energy for charging and will charge from the grid if possible. Leveraged energy sources depend on the battery's configuration. Focus modes target a certain battery behavior but are ultimately internal to the battery; actual behavior might differ from the focus mode.
+          
+          - **EXPORT_FOCUS**: Prioritizes discharging energy stored in the battery back to the household and any excess to the grid. Grid exports often depend on local regulation and might require agreements with grid providers to be supported. Similar to `IMPORT_FOCUS`, focus modes target a certain battery behavior but are ultimately internal to the battery; actual behavior might differ from the focus mode.
+          
+          - **IDLE**: Prevents the battery from charging or discharging. The battery remains in a neutral state.
+          
+          - **UNKNOWN**: Indicates the battery mode is currently unknown. It might be possible to switch to a known mode, but actively returning to `UNKNOWN` is not possible.
+        
+            - Possible enum values:
+	        `IMPORT_FOCUS`, `EXPORT_FOCUS`, `TIME_OF_USE`, `SELF_RELIANCE`, `IDLE`, `UNKNOWN`
+
+        </ResponseField>
+
+        <ResponseField name="lastUpdated" type="string<date-time> or null">
+          Time of last received configuration update
+        </ResponseField>
+      </Accordion>
+    </ResponseField>
+
+    <ResponseField name="capabilities" type="object">
+      A collection of descriptors that describe the capabilities of this specific battery
+      
+      <Accordion title="Child attributes">
+        <ResponseField name="exportFocus" type="object">
+          Supports EXPORT_FOCUS operation mode
+          
+          <Accordion title="Child attributes">
+            <ResponseField name="isCapable" type="boolean">
+              The entity is fully capable of providing this data or functionality. If false, support is partial or missing
+            </ResponseField>
+
+            <ResponseField name="interventionIds" type="array of string">
+              IDs of interventions the user can make to alter the availability of this capability. Please refer to the interventions guide for more information
+            </ResponseField>
+          </Accordion>
+        </ResponseField>
+
+        <ResponseField name="importFocus" type="object">
+          Supports IMPORT_FOCUS operation mode
+          
+          <Accordion title="Child attributes">
+            <ResponseField name="isCapable" type="boolean">
+              The entity is fully capable of providing this data or functionality. If false, support is partial or missing
+            </ResponseField>
+
+            <ResponseField name="interventionIds" type="array of string">
+              IDs of interventions the user can make to alter the availability of this capability. Please refer to the interventions guide for more information
+            </ResponseField>
+          </Accordion>
+        </ResponseField>
+
+        <ResponseField name="timeOfUse" type="object">
+          Supports TIME_OF_USE operation mode
+          
+          <Accordion title="Child attributes">
+            <ResponseField name="isCapable" type="boolean">
+              The entity is fully capable of providing this data or functionality. If false, support is partial or missing
+            </ResponseField>
+
+            <ResponseField name="interventionIds" type="array of string">
+              IDs of interventions the user can make to alter the availability of this capability. Please refer to the interventions guide for more information
+            </ResponseField>
+          </Accordion>
+        </ResponseField>
+
+        <ResponseField name="selfReliance" type="object">
+          Supports SELF_RELIANCE operation mode
+          
+          <Accordion title="Child attributes">
+            <ResponseField name="isCapable" type="boolean">
+              The entity is fully capable of providing this data or functionality. If false, support is partial or missing
+            </ResponseField>
+
+            <ResponseField name="interventionIds" type="array of string">
+              IDs of interventions the user can make to alter the availability of this capability. Please refer to the interventions guide for more information
+            </ResponseField>
+          </Accordion>
+        </ResponseField>
+
+        <ResponseField name="idle" type="object">
+          Supports IDLE operation mode
+          
+          <Accordion title="Child attributes">
+            <ResponseField name="isCapable" type="boolean">
+              The entity is fully capable of providing this data or functionality. If false, support is partial or missing
+            </ResponseField>
+
+            <ResponseField name="interventionIds" type="array of string">
+              IDs of interventions the user can make to alter the availability of this capability. Please refer to the interventions guide for more information
+            </ResponseField>
+          </Accordion>
+        </ResponseField>
+      </Accordion>
+    </ResponseField>
+
+    <ResponseField name="scopes" type="array of string">
+      Scopes that the user has granted for this battery
+    </ResponseField>
+
+    <ResponseField name="location" type="object">
+      Battery's GPS coordinates
+      
+      <Accordion title="Child attributes">
+        <ResponseField name="id" type="string<uuid> or null">
+          ID of the location the battery is currently positioned at (if any)
+        </ResponseField>
+
+        <ResponseField name="longitude" type="number or null">
+          Longitude in degrees
+        </ResponseField>
+
+        <ResponseField name="latitude" type="number or null">
+          Latitude in degrees
+        </ResponseField>
+
+        <ResponseField name="lastUpdated" type="string<date-time> or null">
+          Time of last received location state update
+        </ResponseField>
+      </Accordion>
+    </ResponseField>
+  </Accordion>
+</ResponseField>
+
+<ResponseField name="pagination" type="object">
+  Cursors to the pages before and after current page. See the [PaginationAPI](https://developers.enode.com/api/reference#pagination) section for reference.
+
+  <Accordion title="Child attributes">
+    <ResponseField name="after" type="string or null">
+      Cursor to the previous page
+    </ResponseField>
+    <ResponseField name="before" type="string or null">
+      Cursor to the next page
+    </ResponseField>
+  </Accordion>
+</ResponseField>
+
+<RequestExample>
+```curl 
+curl --request GET \
+  --url 'https://enode-api.production.enode.io/batteries?after=MjAyMy0wNy0xOFQxMDowODowMi4zNzNa&before=MjAyMy0wNy0xOFQxMDowODowMi4zNzNa&pageSize=50' \
+  --header 'Authorization: Bearer REPLACE_BEARER_TOKEN'
+```
+</RequestExample>
+
+<ResponseExample>
+```json
+{
+  "data": [
+    {
+      "id": "54d827e1-8355-4fed-97b5-55940d1d09ba",
+      "userId": "4f6fecd0-bdae-49be-b6e8-ee442e1e3da9",
+      "vendor": "TESLA",
+      "lastSeen": "2020-04-07T17:04:26Z",
+      "isReachable": true,
+      "chargeState": {
+        "status": "CHARGING",
+        "batteryCapacity": 13.5,
+        "batteryLevel": 80,
+        "chargeRate": 4.6,
+        "dischargeLimit": 20,
+        "lastUpdated": "2020-04-07T17:04:26Z"
+      },
+      "config": {
+        "operationMode": "IMPORT_FOCUS",
+        "lastUpdated": "2020-04-07T17:04:26Z"
+      },
+      "information": {
+        "id": "7deb27f8-794f-467b-855e-5c61dd9f2cb3",
+        "brand": "Tesla",
+        "model": "Powerwall",
+        "siteName": "Powerwall Home",
+        "installationDate": "2020-04-07T17:04:26Z"
+      },
+      "capabilities": {
+        "exportFocus": {
+          "isCapable": false,
+          "interventionIds": [
+            "4eaeb363-296d-4ccc-a973-7805e6f400bd"
+          ]
+        },
+        "importFocus": {
+          "isCapable": false,
+          "interventionIds": [
+            "4eaeb363-296d-4ccc-a973-7805e6f400bd"
+          ]
+        },
+        "timeOfUse": {
+          "isCapable": false,
+          "interventionIds": [
+            "4eaeb363-296d-4ccc-a973-7805e6f400bd"
+          ]
+        },
+        "selfReliance": {
+          "isCapable": false,
+          "interventionIds": [
+            "4eaeb363-296d-4ccc-a973-7805e6f400bd"
+          ]
+        },
+        "idle": {
+          "isCapable": false,
+          "interventionIds": [
+            "4eaeb363-296d-4ccc-a973-7805e6f400bd"
+          ]
+        }
+      },
+      "scopes": [
+        "battery:control:operation_mode",
+        "battery:read:data",
+        "battery:read:location"
+      ],
+      "location": {
+        "id": "8d90101b-3f2f-462a-bbb4-1ed320d33bbe",
+        "longitude": 10.7197486,
+        "latitude": 59.9173985,
+        "lastUpdated": "2020-04-07T17:04:26Z"
+      }
+    }
+  ],
+  "pagination": {
+    "after": "MjAyMy0wNy0xOFQxMDowODowMi4zNzNa",
+    "before": "MjAyMy0wNi0xNlQwOTowMzowMS4yNjJa"
+  }
+}
+```
+</ResponseExample>

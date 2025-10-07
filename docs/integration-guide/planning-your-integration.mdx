@@ -1,0 +1,102 @@
+---
+title: Planning your integration
+---
+
+## An overview of our platform
+
+Enode enables you to connect your users’ energy devices to your application. We build and maintain hundreds of integrations across many types of energy devices, unifying their data and functionality so you can focus on building experiences on top of them.
+
+Our services include both building blocks and ready-made features that help your users save money and participate in the energy transition.
+
+### Environments
+
+Our platform also has two [Environments `API`](/api/reference#environments), each with its own purpose.
+
+- *Production*: Allows you to link real devices and access a fully featured API to interact with linked devices. You will use this environment for your live application with end-users.
+- *Sandbox:* Lets you work with mocked devices and a limited set of API capabilities. You can use this to get started with integrating our API or if you don’t yet have access to any real devices or vendor accounts to test with.
+
+### Clients
+
+Access to our API is organized through clients. Each client has its own set of credentials used to access the API and identify the client. You can create one or more clients, depending on your needs. A common setup is to have one client for the live app and one for testing purposes.
+
+Data is separated between clients, and there’s no way to move a user’s data from one client to another or to share data between clients. In fact, the level of separation is the same between clients belonging to the same customer as it is between clients belonging to different users.
+
+To learn more, you can reference the section on [creating your clients](https://developers.enode.com/docs/integration-guide/setting-up).
+
+<Warning>
+**Plan ahead**
+
+You can’t move data between clients, so make sure to plan your client setup well if you decide to create many clients.
+</Warning>
+
+A client belongs to either the production or staging environment. There’s no way to mix real and mock data in the same client, but you can have multiple clients in both environments.
+
+## Vendor accounts and devices
+
+Manufacturer brands (e.g., Tesla, Honeywell, etc.) are called *vendors* in our API, and your users will link their *vendor accounts* to Enode. You get access to all supported energy devices the user has on a vendor account - vehicles, solar inverters, home batteries, etc.
+
+You can learn more about our guide to the [User and Device lifecycle](https://developers.enode.com/docs/integration-guide/user-device-lifecycle).
+
+## Users
+
+In the Enode API, your end-users are modeled as [User `API`](/api/reference#user-management) resources, and your client credentials give you access to data from all end users you have linked to your client.
+
+User resources are created for you automatically during the [vendor linking `API`](/api/reference#postUsersUseridLink) process. During linking, supply us a unique ID (its `userId`) that identifies them in our platform. Any resources and devices related to that user will also have this unique ID associated with it. Some best practices to keep in mind as your plan your data model:
+
+- As a reminder, linking occurs at the *vendor account* level. When linked, you will have access to all devices for that vendor for that user
+- Don’t link the same vendor account across multiple users
+- User IDs can be flexible and should be modeled to fit your specific use case. However, we strongly recommend not introducing tight coupling between your internal data primary keys and Enode user IDs. See more [here](https://developers.enode.com/docs/integration-guide/device-data).
+
+<Warning>
+**Plan ahead**
+
+Read more about accessing [user-specific endpointsAPI](https://developers.enode.com/api/reference#user-management).
+</Warning>
+
+## Technical integration
+
+The Enode platform is accessed through our HTTPS API, which is based on well established standards, universally accessible from modern infrastructures. The API is structured around the [REST architecture](https://restfulapi.net/) and [OAuth 2.0](https://oauth.net/2/) authentication. This means you can bring your current stack and access our API through any language or framework.
+
+All Enode API endpoints are meant to be accessed through your servers, not directly from end user’s apps or devices. There’s no secure way to share direct API access with end users.
+
+### Remember:
+
+- You need to bring your own user management to identify and authenticate users.
+- Enode clients are fully separated and there’s no way to transfer users or data between them.
+- A client access token provides access to data for all end users linked to that client.
+
+### Building a backend
+
+Whether you are building a mobile application, single page web application, or a traditional server-rendered web application, you will interact with the Enode platform via your own server. Your API credentials provide access to all your users’ data from Enode, and must be kept safe in your infrastructure.
+
+<Danger>
+**Stay secure**
+
+Never share the API secret or access token with end users or store them outside your servers
+</Danger>
+
+Your server manages all key tasks in relation to Enode:
+
+1. *Authenticating*: Exchanging the client credentials for a short-lived access token, used to authenticate all API calls. Learn more in [Making authenticated API calls](https://developers.enode.com/docs/integration-guide/accessing-the-api#access-the-api-with-the-access-token).
+2. *Making API calls*: All calls to our API comes from your server, whether they are triggered by your user in your application or triggered by other logic. Learn more about this in [Fetching data](https://developers.enode.com/docs/integration-guide/device-data) and [Controlling devices](https://developers.enode.com/docs/integration-guide/controlling-devices).
+3. *Handling device connections sessions*: Initiating sessions for Link UI, our hosted UI for connecting to your users’ devices. Learn more about [Connecting to users’ devices](https://developers.enode.com/docs/integration-guide/user-device-lifecycle).
+4. *Managing real-time events*: Handling incoming webhooks to get real-time events and data updates in your application. Learn more about this in [Fetching data](https://developers.enode.com/docs/integration-guide/device-data) and [Controlling devices](https://developers.enode.com/docs/integration-guide/controlling-devices).
+
+### Persistence
+
+Our API stores and reflects most of the of the data you need to interact with your users’ devices. To build a fully featured, production ready application on top of the Enode platform you need to store a minimum of data in your platform:
+
+- *Client secret and access token*: To make authenticated API calls, you need to use your client secret to retrieve a short-lived access token. The secret and token must be stored securely. You will learn more about this in the section about [making authenticated API calls](https://developers.enode.com/docs/integration-guide/accessing-the-api#access-the-api-with-the-access-token).
+- *User data:* Your user management system needs to map between your own user IDs and Enode user IDs.
+- *Device data:* We recommend that you store all Enode data used by your app in your platform and keep the data [fresh](https://developers.enode.com/docs/integration-guide/device-data) by integrating with our webhooks. This allows you to query and cross-reference data anyway you need, and keeps latency at a minimum.
+- *Data for analytics and debugging*: Metrics and events describing user behaviour, aggregated device and feature data for analytics, and logging of information for debugging purposes. You can learn more about logging information in the section about [handling errors and debugging](https://developers.enode.com/docs/integration-guide/sad-paths-and-errors#best-practices-for-error-handling).
+
+### Building an event-based Enode integration
+
+We recommend that you use [webhooks](https://developers.enode.com/docs/webhooks) to keep your application state in sync with Enode data. This ensures that you always have the latest data in your storage without polling Enode APIs, increasing performance of your application. You can also use webhook events to send notifications to your user when important events occur.
+
+### Security
+
+Your client credentials provide access to all user data tied to your client. The long-lived client secret is used only to request short-lived access tokens, and we recommend storing the secret in a secure enclave where it’s only accessible to request the tokens.
+
+Our API is only accessible via HTTPS, ensuring that all communication is encrypted. See more in part 4 - [Accessing the Enode API in a secure way](https://developers.enode.com/docs/integration-guide/accessing-the-api#access-the-api-with-the-access-token).

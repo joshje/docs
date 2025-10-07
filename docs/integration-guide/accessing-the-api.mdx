@@ -1,0 +1,90 @@
+---
+title: Accessing the API
+description: "The Enode API uses [OAuth 2.0](https://oauth.net/2/) client access tokens to authenticate requests coming from your server. To access our API, you will exchange your client’s API credentials for a short-lived access token, and include the token in all calls to our API."
+---
+
+<Warning>
+**Prerequisites**
+
+Before proceeding to make authenticated API calls, make sure you have [created a client](https://developers.enode.com/docs/integration-guide/setting-up#how-to-create-clients).
+
+We also recommend [the introductory article in this series](https://developers.enode.com/docs/integration-guide/introduction), explaining key concepts about the Enode platform and how you can integrate it in your infrastructure.
+</Warning>
+
+
+## Get your API credentials
+
+From your [organization dashboard](https://developers.enode.com/dashboard), navigate to your client and click it to view its details. For the purpose of testing the authentication flow, we recommend you start with a client pointing to the sandbox environment. The API credentials for your clients can be found in the [API credentials](https://developers.enode.com/dashboard) section in your client’s settings.
+
+- Your *client ID* will be available directly after creation.
+- Your *client secret* needs to be generated, as this will only be visible once upon creation.
+
+Click `Generate client secret` to create your client secret. Copy your *client secret* and store it in a secure location.
+
+<Danger>
+**Storing your client secret securely**
+
+Your *client secret* is private and should not be shared with anyone outside of your organization. It should be stored securely, and never be exposed publicly in client-side code or in public git repositories.
+</Danger>
+
+### Regenerating the client secret
+
+Should you lose access to your client secret, or suspect that it might be leaked, you can generate a new secret. From the [API credentials](https://developers.enode.com/dashboard) section of your clients, click `Regenerate secret`.
+
+Once you confirm, you’ll then be presented with a new *client secret*, and the old client secret will be immediately invalidated. You can only have one active secret at a time.
+
+<Warning>
+**Regenerating the client secret for clients with real users**
+
+If you are regenerating the client secret for a client with real users, we recommend planning this thoroughly to ensure your users won’t lose access to their data in the transition. Be ready to update your client secret values to the new one across your codebase and services immediately after regeneration.
+</Warning>
+
+## Get an access token
+
+The *access token* allows you to authenticate with your client, authorizing access to all data and functionality within your client. The token is obtained via the standard [OAuth 2.0 client credentials grant](https://www.oauth.com/oauth2-servers/access-tokens/client-credentials/), using the API credentials and the corresponding OAuth URL for the environment of your client. You can leverage this example to generate an access token yourself, but we recommend following our best practice to use an existing OAuth library in production.
+
+With your *client ID* and *client secret*, you can pass these as authorization headers to the *OAuth token URL*, which can be found in the [API credentials](https://developers.enode.com/dashboard) section of your client’s settings.
+
+```bash Token request example
+curl {OAUTH_TOKEN_URL} \
+-X POST \
+-u {YOUR_CLIENT_ID}:{YOUR_CLIENT_SECRET} \
+-d "grant_type=client_credentials"
+```
+
+After requesting the token URL as described above, you’ll receive a response containing your access token. This access token should be cached on your server or stored in one of your datastores until it expires and subsequently needs to be refreshed.
+
+```json Token response example
+{
+  "access_token": "{YOUR_ACCESS_TOKEN}",
+  "expires_in": 3599,
+  "scope": "",
+  "token_type": "bearer"
+}
+```
+
+<Warning>
+**Keep your access tokens secret**
+
+As with the [client secret](https://developers.enode.com/docs/integration-guide/accessing-the-api#get-your-api-credentials), the access token must be kept secret.
+</Warning>
+
+### Best practice? Use an existing library to handle authentication
+
+Since our API implements the [OAuth 2.0 specification](https://www.rfc-editor.org/rfc/rfc6749) without any modifications, you can use a number of OAuth libraries to mange the authentication process for you. We recommend this route over rolling your own implementation, as these are usually battle tested and well maintained. You can refer to [this overview](https://oauth.net/code/) of some of the libraries available in common programming languages.
+
+### Refreshing access tokens
+
+The access token expires every hour, as described by the `expires_in` key in the access token response. Once your token expires, your server should repeat the process to obtain a new access token. OAuth libraries can help manage this process for you.
+
+## Access the API with the access token
+
+With your access token ready, you can now start accessing the Enode API. All API requests towards your client need to be authenticated via a [bearer authentication header](https://www.rfc-editor.org/rfc/rfc6750#section-2.1).
+
+```bash Client-wide resource request example
+curl {API_URL}/vehicles \
+-H "Authorization: Bearer {YOUR_ACCESS_TOKEN}" \
+-H "Content-Type: application/json" \
+```
+
+You can grab the *API URL* from the [API credentials](https://developers.enode.com/dashboard) section of your organization dashboard.

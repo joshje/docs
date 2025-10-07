@@ -1,0 +1,14 @@
+---
+title: Introduction
+description: "Enode’s smart charging algorithm shifts electric vehicle charging to off-peak periods, reducing costs for end-users and helping balance the power grid load."
+---
+
+Based on two user inputs — a daily deadline and a charging location — smart charging is executed automatically. In day-to-day use, the end-user simply plugs in their vehicle, and the algorithm ensures charging occurs during the cheapest possible time window before the deadline.
+
+<Frame>
+![](https://developers.enode.com/_vercel/image?url=%2Fimages%2Fsmart-charging%2FIntroduction__Smart_charging_behavior.png&q=100&w=800)
+</Frame>
+
+To achieve this, our technology continuously calculates and analyzes a host of variables behind the scenes. We consider the deadline, live vehicle data, estimated charge time, and live electricity market data before passing it through a series of checks. This results in a charge plan that is executed automatically.
+
+In this series of guides, we will detail the mechanisms and touch on aspects worth considering when designing and building smart charging functionality for your product.

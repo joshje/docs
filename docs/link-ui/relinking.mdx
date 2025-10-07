@@ -1,0 +1,104 @@
+---
+title: Relinking
+description: "This document describes how your app can trigger relinking flows for specific assets. By providing additional context from your app, Link UI can display a more relevant - and often shorter - relinking flow."
+---
+
+Integrating with the Link UI relinking flow allows you to:
+
+- Resolve interventions which require user interaction within Link UI
+- Relink a device which Enode no longer has access to
+
+## Detecting which interventions can be resolved with Link UI
+
+Interventions require the user to take action within the OEM app, within their vehicle, or within Link UI.
+
+To detect which interventions can be resolved through relinking, query the [Interventions APIAPI](https://developers.enode.com/api/reference#getIntervention), and look for the `action: Link` property under the resolutions object. For example, the [Tesla Phone Key](https://developers.enode.com/docs/interventions/3b2891a9-5dcf-4691-b850-b5ea36b57c2e) intervention can be resolved by visiting Link UI, as it has the `action: Link` property.
+
+
+```json An example intervention which can be resolved by visiting Link UI
+{
+    "id": "3b2891a9-5dcf-4691-b850-b5ea36b57c2e",
+    "vendor": "TESLA",
+    "vendorType": "vehicle",
+    "brand": "Tesla",
+    "introducedAt": "2023-12-15T00:00:00.000Z",
+    "domain": "Device",
+    "resolution": {
+      "title": "Vehicle is missing a phone key",
+      "description": "To control your vehicle's charging, you must re-link your vehicle with this app. <br><br>To do so, revisit the initial linking process in this app. Be sure to be in your vehicle so that you can complete the Bluetooth pairing step towards the end of the linking flow. <br><br>If you have difficulties with relinking your vehicle or with Bluetooth pairing, reach out to customer support.",
+      "access": "Physical",
+      "agent": "User",
+      "action": "Link" // <-- the mentioned action property
+    }
+}
+```
+
+Interventions can be present on multiple capabilities, so we recommend checking all interventions on an asset.
+
+The example shows how you could query our Interventions API for all the interventions on a vehicle.
+
+
+```js Detecting resolveable interventions on a vehicle expandable
+import { uniq, flatten } from "lodash"
+
+async function getVehicle(id: string) {
+  // get vehicle from Enode
+}
+
+async function getInterventionData(id: string) {
+  // get intervention data from Enode
+}
+
+const vehicle = await getVehicle(vehicleId)
+
+const allVehicleInterventionsUnique = uniq(
+  flatten([
+    vehicle.capabilities.information.interventionIds,
+    vehicle.capabilities.chargeState.interventionIds,
+    vehicle.capabilities.location.interventionIds,
+    vehicle.capabilities.startCharging.interventionIds,
+    vehicle.capabilities.stopCharging.interventionIds
+  ])
+)
+
+const interventionData = await Promise.all(
+  allVehicleInterventionsUnique.map(i => getInterventionData(i.id))
+)
+
+const resolveableInterventions = interventionData.filter(
+  intervention => intervention.resolution.action === "Link"
+)
+
+if (resolveableInterventions.length > 0) {
+  // show a warning and a button which triggers a relinking session
+}
+```
+
+## Resolving interventions through Relinking
+
+To start a relinking session, you can use our [*Relink API*API](https://developers.enode.com/api/reference#postAssetsAssetidRelink).
+
+Link UI will use the `assetId` to determine which relinking flow to display. The scopes from the original linking session will be reused.
+
+```bash Request sample
+curl https://enode-api.{ENVIRONMENT}.enode.io/assets/{ASSET_ID}/relink \
+  -X POST \
+  -H "Authorization: Bearer {YOUR_ACCESS_TOKEN}" \
+  -H "Content-Type: application/json" \
+  -d '{
+        "language": "en-US",
+        "redirectUri": "yourapp://integrations/enode"
+      }'
+```
+
+The corresponding response is the same as for a regular linking session:
+
+
+```json Response sample
+{
+  "linkUrl": "https://link.enode.com/YzIwZThhYjYtMjMzMi00ZTAyLTg0OTYtYzdjOTlhZTY3Zjc3QDI2YzI1MDExLTdhYTctNGE2NS1iNjBmLTZmMzc5NmRhODUyMDowNDViYjFiYmE0M2Y5NDU5YTc5OTgxZmEyYTg1NmI4YzhkOGU4YjgyNmNmMzQzZmFmMGNhZTlmNDBjMmZmOTgy",
+  "linkToken": "U2FtcGxlIFNESyB0b2tlbgpTYW1wbGUgU0RLIHRva2VuClNhbXBsZSBTREsgdG9rZW4KU2FtcGxlIFNESyB0b2tlbg=="
+}
+```
+
+For more details on this endpoint, please see the [Relink API referenceAPI](https://developers.enode.com/api/reference#postAssetsAssetidRelink).

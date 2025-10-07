@@ -1,0 +1,39 @@
+---
+title: "Response times"
+description: "Enode resources like Schedules and Locations have response times of `<200ms`. However, vehicle interactions involve various delays and timing characteristics."
+---
+
+Understanding the range of possible timings without diving into vendor-specific causes, helps you account for these factors in your UX design.
+
+### API GET requests
+
+#### Get Vehicle
+
+`Get Vehicles` and `List Vehicles` are fast operations since all data is prefetched by Enode and shared from a cache.
+
+On API versions prior to `2023-08-01` it is possible to request a synchronous update where data is fetched directly from the vendor. Such requests have longer response times, sometimes 30 seconds or more, depending on the characteristics of the underlying vendor APIs. From `2023-08-01` onwards this has been replaced by the [refresh hintAPI](https://developers.enode.com/api/reference#chargersRefreshHint) mechanism.
+
+#### Link User
+
+The `Login` step usually takes `<2 seconds`, but can rarely take up to `30 seconds` due to background negotiations, retries, and initial vehicle data fetching.
+
+The final `Accept` step experiences similar delays as `List Vehicles`.
+
+#### Charging commands
+
+Charging commands show significant timing variability among vendors. Initiating the action is instant, but the updated charging state typically takes 20 seconds to appear. Occasionally the action may take 5 minutes or more to confirm.
+
+#### Webhooks
+
+Webhooks typically involve polling and dynamically adjust the polling rate based on various factors to balance prompt updates with avoiding unnecessary load on the vehicle.
+
+The maximum baseline delay between a real-world change (e.g., a vehicle being plugged in) and the resulting webhook notification is typically 7 minutes. However, actual delays can vary depending on factors such as vehicle activity and network conditions. Below is a general guide for typical webhook delays:
+
+| Vehicle context | Typical delay |
+| :--- | :--- |
+| default | \~7 minutes |
+| charging | \~2-5 minutes |
+| smartcharge PLAN:\* | \~2 minutes |
+| sleeping | \~20 minutes |
+
+If you'd like to request a faster refresh, you can call the various `/refresh-hint` endpoints found on devices to queue an accelerated data refresh.

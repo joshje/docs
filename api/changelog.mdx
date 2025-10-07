@@ -1,0 +1,102 @@
+---
+title: Changelog
+description: "Keep track of updates and new API versions. More on versioning [here](https://developers.enode.com/api/reference#versioning)."
+rss: true
+---
+
+<Update label="October 3, 2025" tags={["Update"]}>
+
+### New battery operation mode: IDLE
+
+- Maintain a specific state of charge over time with IDLE mode for batteries
+
+	Setting a battery into IDLE mode enables battery optimization use cases such as:
+
+	- **Prevent the battery from discharging** to cover household load - this is useful to shift discharging to a later point in time, for example when prices are high.
+	- **Prevent the battery from charging** from solar - This is useful to ensure free battery capacity is available at a later point in time, for example when prices are low. Solar will continue to produce as normal, but the battery will not charge from it.
+
+	IDLE mode is an important building block when optimizing batteries. Our initial release adds support for **SolarEdge** and **Solis** (hybrid) inverters connected to a battery. We are working towards supporting more vendors soon.
+
+	To learn more, please visit our API documentation on [battery modes](https://developers.enode.com/api/capabilities/battery#operation-modes).
+
+</Update>
+
+<Update label="October 3, 2025" tags={["Update"]}>
+
+### Fullscreen support: iOS Link SDK
+
+The Link UI modal in the iOS Link SDK now supports fullscreen presentation style
+
+	The `1.0.7` release of the iOS SDK brings full screen support for Link UI.
+
+	You can now choose between the following presentation styles:
+	- Sheet (default)
+	- Fullscreen
+
+	Read our [iOS SDK documentation](https://developers.enode.com/docs/link-sdks/ios) to learn more
+</Update>
+
+<Update label="September 12, 2025" tags={["Update"]}>
+
+### Improved “Find by ID” usability and search hints
+
+- Enhanced Find by ID with a clearer interface, helpful search hints, and support for VIN lookups to increase successful searches
+
+	The Find by ID feature has been refined to increase successful searches and provide clearer guidance when no results are found. Enhancements include:
+
+	- Built-in support for search by VIN
+	- A revamped UI that makes the process clearer and more intuitive
+	- Context-aware hints for cases such as attempting to search under an unintended client account, looking up users without associated assets, or entering familiar terms like vendor names instead of IDs
+</Update>
+
+
+<Update label="September 4, 2025" tags={["Update"]}>
+
+### Garo, Keba and Heidelberg chargers are now generally available
+
+- We are removing the beta label from Garo, Keba and Heidelberg chargers
+
+The integrations have been stable for several months. These assets can now be linked to all Enode clients without manual activation.
+</Update>
+
+<Update label="August 28, 2025" tags={["New"]}>
+
+### EV Charger Dynamic Pairing - Seamless Vehicle and Charger Orchestration
+
+Unified control and unlocked capabilities are now available to Early Adopters on an opt-in basis.
+
+#### Unified Control
+
+**Unified Control** allows you to manage EV charging using the [Vehicle APIAPI](https://developers.enode.com/api/reference#vehicles) and leverage any [supported charger](https://developers.enode.com/api/capabilities/charger) linked to the same Enode `userId`.
+
+When a vehicle is plugged into a charger:
+
+	- **Seamless orchestration:** Send commands to the Vehicle API as usual. Enode automatically coordinates with the charger for optimal control
+	- **Fallback compatibility:** If the vehicle is unplugged or connected to a different charger, control remains unchanged via the vehicle only
+	- **Smart Charging enhancement:** Vehicles with [Smart Charging](https://developers.enode.com/docs/smart-charging/introduction) enabled automatically leverage charger controls when executing their plan
+	- **Scheduling enhancements:** Vehicles using [Schedules](https://developers.enode.com/docs/scheduling) automatically leverage charger controls when executing their schedule
+
+
+	#### Unlocked Capabilities
+
+	Linking a charger to the same user immediately unlocks previously unavailable vehicle capabilities:
+
+	- **Charging control:** Vehicles gain `isCapable: true` for `startCharging` and `stopCharging` the moment a charger is linked
+	- **Location detection:** Vehicles gain `isCapable: true` for `location` when it can be inferred from the charger
+	- **Smart Charging eligibility:** Vehicles that previously lacked control capabilities are now eligible for Smart Charging
+
+	By leveraging these unlocked capabilities, customers can expand the market reach of their managed EV charging programs.
+
+	**Interested in testing these features and helping us shape this solution? Inquire with your Customer Success Manager about joining our Early Adopter Program.**
+</Update>
+
+<Update label="August 15, 2025" tags={["New"]}>
+
+### Expanded Support: Solis Batteries and Meters
+
+- Expanded support for Solis
+
+	Solis battery and meter asset types are now ready for beta testing.
+
+	To opt-in, please navigate to the `enabled-brands` section under your Enode client and activate it.
+</Update>

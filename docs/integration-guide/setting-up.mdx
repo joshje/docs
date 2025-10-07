@@ -1,0 +1,44 @@
+---
+title: Setting up your account
+---
+
+You can sign up to the Enode platform [here](https://developers.enode.com/register). Anybody can create a developer account and get started right away in our sandbox environment.
+
+When you sign up, two important entities are created.
+
+- An **Enode** **organization** representing your company or your project. All [clients](https://developers.enode.com/docs/integration-guide/planning-your-integration#clients) created by you will be tied to your organization.
+- Your **individual developer account** with administrative rights to manage your Enode organization. (Multiple developer accounts can exist within your organization.)
+
+Fill in the your desired organization name, your full name and e-mail address. You do not need to set a password since the Enode platform relies on magic links to log in.
+
+<Info>
+**Sharing access**
+
+You can invite additional team members to your organization through the [Members page](https://developers.enode.com/dashboard/members).
+</Info>
+
+## Create your clients
+
+To begin using the Enode API you need to create at least one client and fetch the related credentials. Data is completely separated between clients and can’t be shared or transferred between clients.
+
+### What clients do you need?
+
+Depending on your setup, you may need more than one client. We recommend using at least three clients and that you start by creating a sandbox client immediately:
+
+| Client type | Environment | Usage |
+| --- | --- | --- |
+| *Sandbox* | [Sandbox](https://developers.enode.com/docs/integration-guide/planning-your-integration#environments) | Local development, including to test authentication and make your first API requests, integrate with your application, and test with mocked devices. |
+| *Staging* | [Production](https://developers.enode.com/docs/integration-guide/planning-your-integration#environments) | Testing functionality or changes with your real devices in a controlled, internal setting. |
+| *Live* | [Production](https://developers.enode.com/docs/integration-guide/planning-your-integration#environments) | Powers your live app, with real end-users and their real linked devices. |
+
+Once you're ready to move beyond the sandbox, [get in touch](https://enode.com/contact) for access to create Production clients.
+
+You may want more than one live client if you’re serving many distinct apps or services that should not share user data.
+
+### How to create clients
+
+To create your clients, click `Create new client` from your [organization dashboard](https://developers.enode.com/dashboard) and fill in the form.
+
+- **Client name** is an internal name, only visible to you and your organization, and can be used to differentiate between different environments, markets, or projects.
+- **Link UI display name** is an externally visible name your users will see in the [when linking their devices](https://developers.enode.com/docs/integration-guide/user-device-lifecycle).
+- **Client environment** defines which environment the client should point to. You can change both the **client name** and **Link UI display name** at a later time. Each client comes with their own set of **API credentials**, which you’ll use to make authenticated API calls.
